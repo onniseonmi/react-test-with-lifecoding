@@ -1,7 +1,9 @@
 import React, {Component} from "react";
 import TOC  from "./components/TOC";
-import Content  from "./components/Content";
+import ReadContent  from "./components/ReadContent";
+import CreateContent  from "./components/CreateContent";
 import Subject  from "./components/Subject";
+import Control  from "./components/Control";
 
 
 
@@ -11,7 +13,8 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      mode: "read",
+      mode: "create",
+      selected_content_id: 2,
       subject: {
         title: "우리는",
         sub: "개발자"
@@ -30,13 +33,26 @@ class App extends Component {
   }//생성자
   render() {
     console.log("app render");
-    let _title, _desc = null;
+    let _title, _desc, _article = null;
     if(this.state.mode === 'welcome') {
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
     } else if(this.state.mode === 'read') {
-      _title = this.state.contents[0].title;
-      _desc = this.state.contents[0].desc
+      let i =0;
+      while(i < this.state.contents.length) {
+        let data = this.state.contents[i];
+        if(data.id === this.state.selected_content_id) {
+          _title = data.title;
+          _desc = data.desc;
+          break
+        }
+        i+=1;
+      }
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>;
+    } else if(this.state.mode === 'create') {
+      _article = <CreateContent></CreateContent>
+      console.log("create");
     }
     console.log('render', this)//this는 컴포넌트 자신을 가리킴
     return (
@@ -57,8 +73,20 @@ class App extends Component {
           }.bind(this)}>{this.state.subject.title}</a></h1>
           {this.state.subject.sub}
         </header> */}
-        <TOC data={this.state.contents}></TOC>
-        <Content title={_title} desc={_desc}></Content>
+        <TOC onChangePage ={function(id) {
+          this.setState({
+            mode:'read',
+            selected_content_id:Number(id)
+          });
+        }.bind(this)} 
+         data={this.state.contents}
+         ></TOC>
+         <Control onChangeMode={function(_mode) {
+           this.setState({
+             mode : _mode
+           });
+         }.bind(this)}></Control>
+        {_article}
       </div>
     )
   }
